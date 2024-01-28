@@ -1,6 +1,7 @@
 use reqwest::StatusCode;
 use serde::Deserialize;
 use serde_json::json;
+use tracing::debug;
 
 use crate::{
     client::constant::{ACTION_HEADER, REGION_HEADER},
@@ -116,12 +117,7 @@ impl CVMInstanceBuilder {
             .await?;
 
         match resp.status() {
-            StatusCode::OK => {
-                Ok(resp.json().await?)
-                // let body = resp.text().await;
-                // println!("body: {body:?}");
-                // Ok(())
-            }
+            StatusCode::OK => Ok(resp.json().await?),
             rest => Err(anyhow::anyhow!(
                 "err get code {rest}, msg {}",
                 resp.text().await?
@@ -164,7 +160,7 @@ impl CVMInstanceBuilder {
         match resp.status() {
             StatusCode::OK => {
                 let body: InquiryPriceRunInstancesResponse = resp.json().await?;
-                // println!("body: {body:?}");
+                debug!("body: {body:?}");
                 Ok(body.response.price)
             }
             rest => Err(anyhow::anyhow!(
@@ -219,8 +215,10 @@ impl CVMInstanceBuilder {
 
         match resp.status() {
             StatusCode::OK => {
-                let body: RunInstancesResponse = resp.json().await?;
-                // println!("body: {body:?}");
+                let body = resp.text().await?;
+                debug!("body: {body:?}");
+                let body: RunInstancesResponse = serde_json::from_str(&body)?;
+                debug!("body: {body:?}");
                 body.response
                     .instance_id_set
                     .into_iter()
@@ -253,7 +251,7 @@ impl CVMInstanceBuilder {
         match resp.status() {
             StatusCode::OK => {
                 let body = resp.text().await;
-                println!("body: {body:?}");
+                debug!("body: {body:?}");
                 Ok(())
             }
             rest => Err(anyhow::anyhow!(

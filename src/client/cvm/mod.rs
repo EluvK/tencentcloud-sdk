@@ -4,6 +4,7 @@ use super::TencentCloudBaseClient;
 
 pub mod cvm_instance;
 pub mod cvm_key;
+pub mod cvm_security_group;
 pub mod cvm_zone;
 
 pub struct CVMBuilder {
@@ -25,5 +26,9 @@ impl CVMBuilder {
 
     pub fn keys(&self) -> cvm_key::CVMKeyBuilder {
         cvm_key::CVMKeyBuilder::new(self.client.clone())
+    }
+
+    pub fn security_group(&self) -> cvm_security_group::SecurityGroupBuilder {
+        cvm_security_group::SecurityGroupBuilder::new(self.client.clone())
     }
 }
