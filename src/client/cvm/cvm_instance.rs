@@ -13,6 +13,7 @@ use super::*;
 pub struct CVMInstanceBuilder {
     client: Arc<TencentCloudBaseClient>,
     service_name: String,
+    version: String,
 }
 
 /// DescribeInstancesResponse
@@ -101,6 +102,7 @@ impl CVMInstanceBuilder {
         Self {
             client,
             service_name: "cvm".into(),
+            version: "2017-03-12".into(),
         }
     }
     pub async fn describe_instance(
@@ -109,7 +111,7 @@ impl CVMInstanceBuilder {
     ) -> anyhow::Result<DescribeInstancesResponse> {
         let resp = self
             .client
-            .post(&self.service_name)
+            .post(&self.service_name, &self.version)
             .header(ACTION_HEADER, DESCRIBE_INSTANCES)
             .header(REGION_HEADER, region.to_string())
             .json(&json!({}))
@@ -134,7 +136,7 @@ impl CVMInstanceBuilder {
     ) -> anyhow::Result<Price> {
         let resp = self
             .client
-            .post(&self.service_name)
+            .post(&self.service_name, &self.version)
             .header(ACTION_HEADER, INQUIRY_PRICE_RUN_INSTANCES)
             .header(REGION_HEADER, region.to_string())
             .json(&json!({
@@ -206,7 +208,7 @@ impl CVMInstanceBuilder {
         }
         let resp = self
             .client
-            .post(&self.service_name)
+            .post(&self.service_name, &self.version)
             .header(ACTION_HEADER, RUN_INSTANCES)
             .header(REGION_HEADER, region.to_string())
             .json(&body)
@@ -239,7 +241,7 @@ impl CVMInstanceBuilder {
     ) -> anyhow::Result<()> {
         let resp = self
             .client
-            .post(&self.service_name)
+            .post(&self.service_name, &self.version)
             .header(ACTION_HEADER, TERMINATE_INSTANCES)
             .header(REGION_HEADER, region.to_string())
             .json(&json!({

@@ -11,6 +11,7 @@ use crate::{
 pub struct SecurityGroupBuilder {
     client: Arc<TencentCloudBaseClient>,
     service_name: String,
+    version: String,
 }
 
 const DESCRIBE_SECURITY_GROUPS: &str = "DescribeSecurityGroups";
@@ -44,6 +45,7 @@ impl SecurityGroupBuilder {
         Self {
             client,
             service_name: "vpc".into(),
+            version: "2017-03-12".into(),
         }
     }
     pub async fn describe_security_groups(
@@ -52,7 +54,7 @@ impl SecurityGroupBuilder {
     ) -> anyhow::Result<Vec<SecurityGroupInfo>> {
         let resp = self
             .client
-            .post(&self.service_name)
+            .post(&self.service_name, &self.version)
             .header(ACTION_HEADER, DESCRIBE_SECURITY_GROUPS)
             .header(REGION_HEADER, region.to_string())
             .json(&json!({}))

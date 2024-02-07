@@ -19,6 +19,7 @@ pub struct SignatureContext {
     pub sk: String,
     pub signed_headers: Option<Vec<HeaderName>>,
     pub service_name: String,
+    pub version: String,
 }
 
 pub struct SignatureMiddleware;
@@ -52,7 +53,7 @@ pub fn add_authorization(req: &mut Request, context: &SignatureContext) -> anyho
     let ts = OffsetDateTime::now_utc().unix_timestamp();
     req.headers_mut().insert(TIME_HEADER, ts.into());
     req.headers_mut()
-        .insert(TC_VERSION, "2017-03-12".parse().unwrap());
+        .insert(TC_VERSION, context.version.parse().unwrap());
 
     let host = req.url().host_str().map(|s| s.to_owned());
     if let Some(host) = host {
@@ -204,6 +205,7 @@ mod tests {
                 HeaderName::from_str(ACTION_HEADER).unwrap(),
             ]),
             service_name: "cvm".into(),
+            version: "2017-03-12".into(),
         };
 
         let r = add_authorization(&mut req, &signature_context).unwrap();

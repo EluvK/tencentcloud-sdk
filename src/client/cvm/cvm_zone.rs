@@ -13,6 +13,7 @@ use super::*;
 pub struct CVMZoneBuilder {
     client: Arc<TencentCloudBaseClient>,
     service_name: String,
+    version: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -37,12 +38,13 @@ impl CVMZoneBuilder {
         Self {
             client,
             service_name: "cvm".into(),
+            version: "2017-03-12".into(),
         }
     }
     pub async fn describe_zone(&self, region: &Region) -> anyhow::Result<Option<Vec<String>>> {
         let resp = self
             .client
-            .post(&self.service_name)
+            .post(&self.service_name, &self.version)
             .header(ACTION_HEADER, DESCRIBE_ZONES)
             .header(REGION_HEADER, region.to_string())
             .json(&json!({}))

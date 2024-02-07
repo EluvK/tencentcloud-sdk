@@ -10,6 +10,7 @@ use crate::config::ClientConfig;
 
 mod constant;
 pub mod cvm;
+pub mod lighthouse;
 
 pub use constant::*;
 
@@ -29,6 +30,9 @@ impl TencentCloudClient {
     }
     pub fn cvm(&self) -> cvm::CVMBuilder {
         cvm::CVMBuilder::new(self.client.clone())
+    }
+    pub fn lighthouse(&self) -> lighthouse::LighthouseBuilder {
+        lighthouse::LighthouseBuilder::new(self.client.clone())
     }
 }
 
@@ -55,24 +59,25 @@ impl TencentCloudBaseClient {
         // base_url: "https://cvm.tencentcloudapi.com".to_owned(),
     }
 
-    pub fn get(&self, service: &str) -> RequestBuilder {
+    pub fn get(&self, service: &str, version: &str) -> RequestBuilder {
         self.client
             .get(build_service_api_url(&self.base_url, service))
-            .with_extension(self.signature_context(service))
+            .with_extension(self.signature_context(service, version))
     }
 
-    pub fn post(&self, service: &str) -> RequestBuilder {
+    pub fn post(&self, service: &str, version: &str) -> RequestBuilder {
         self.client
             .post(build_service_api_url(&self.base_url, service))
-            .with_extension(self.signature_context(service))
+            .with_extension(self.signature_context(service, version))
     }
 
-    pub fn signature_context(&self, service: &str) -> SignatureContext {
+    pub fn signature_context(&self, service: &str, version: &str) -> SignatureContext {
         SignatureContext {
             ak: self.ak.clone(),
             sk: self.sk.clone(),
             signed_headers: Some(vec![header::CONTENT_TYPE, header::HOST]),
             service_name: service.to_owned(),
+            version: version.to_owned(),
         }
     }
 }
@@ -83,24 +88,4 @@ fn build_service_api_url(url: &str, service_name: &str) -> String {
         service_name,
         &url[url.find("://").map_or(0, |x| x + 3)..]
     )
-}
-
-#[cfg(test)]
-mod tests {
-    use serde_json::json;
-
-    #[allow(unused_imports)]
-    use super::*;
-
-    #[tokio::test]
-    async fn test_send() {
-        let base_client = TencentCloudBaseClient::new("ak".into(), "sk".into());
-        let r = base_client
-            .get("cvm")
-            .json(&json!({"key":"value"}))
-            .send()
-            .await
-            .unwrap();
-        println!("r: {r:?}");
-    }
 }

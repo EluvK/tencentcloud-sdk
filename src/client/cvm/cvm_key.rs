@@ -11,6 +11,7 @@ use super::*;
 pub struct CVMKeyBuilder {
     client: Arc<TencentCloudBaseClient>,
     service_name: String,
+    version: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -43,12 +44,13 @@ impl CVMKeyBuilder {
         Self {
             client,
             service_name: "cvm".into(),
+            version: "2017-03-12".into(),
         }
     }
     pub async fn describe_key_pairs(&self, region: &Region) -> anyhow::Result<Vec<KeyPair>> {
         let resp = self
             .client
-            .post(&self.service_name)
+            .post(&self.service_name, &self.version)
             .header(ACTION_HEADER, DESCRIBE_KEY_PAIRS)
             .header(REGION_HEADER, region.to_string())
             .json(&json!({}))
